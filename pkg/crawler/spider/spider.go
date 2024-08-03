@@ -34,7 +34,6 @@ func (s *Service) Scan(url string, depth int) (data []crawler.Document, err erro
 		}
 		data = append(data, item)
 	}
-
 	return data, nil
 }
 
@@ -57,7 +56,6 @@ func parse(url, baseurl string, depth int, data map[string]string) error {
 	}
 
 	data[url] = pageTitle(page)
-
 	if depth == 1 {
 		return nil
 	}

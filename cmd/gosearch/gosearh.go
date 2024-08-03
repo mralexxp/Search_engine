@@ -33,8 +33,6 @@ func search(text string, res *[]crawler.Document) (result []crawler.Document, qt
 		contain := strings.Contains(page.Title, text)
 		if contain {
 			result = append(result, page)
-			fmt.Println(page.URL)
-			fmt.Println(page.Title)
 			qty++
 		}
 	}
@@ -43,17 +41,12 @@ func search(text string, res *[]crawler.Document) (result []crawler.Document, qt
 }
 
 func main() {
-	urls := []string{"https://go.dev"}
+	urls := []string{"https://go.dev/"}
 	depth := 2
 	sText := getFlagS()
 	res := craw(urls, depth)
 	for _, value := range res {
-		fmt.Println("========================")
-		fmt.Println(value.ID)
-		fmt.Println(value.URL)
 		fmt.Println(value.Title)
-		fmt.Println(value.Body)
-		fmt.Println("========================")
 	}
 	if sText == "" {
 		fmt.Println("Аргументы отсутствуют. Поиск отменен.")
