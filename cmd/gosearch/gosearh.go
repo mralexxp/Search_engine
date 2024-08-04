@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"gosearch/pkg/crawler"
 	"gosearch/pkg/crawler/spider"
-	"strings"
-	// "gosearch/pkg/crawler/membot"
+	"gosearch/pkg/index"
 )
 
 func getFlagS() string {
@@ -28,32 +27,28 @@ func craw(urls []string, depth int) []crawler.Document {
 	return reSearch
 }
 
-func search(text string, res *[]crawler.Document) (result []crawler.Document, qty int) {
-	for _, page := range *res {
-		contain := strings.Contains(page.Title, text)
-		if contain {
-			result = append(result, page)
-			qty++
-		}
-	}
-	return result, qty
-
-}
-
 func main() {
 	urls := []string{"https://go.dev/"}
 	depth := 2
 	sText := getFlagS()
-	res := craw(urls, depth)
-	for _, value := range res {
-		fmt.Println(value.Title)
-	}
-	if sText == "" {
+	// sText := "Packages"
+	// Временное решение с ветвлением VVV
+	switch sText {
+	case "":
 		fmt.Println("Аргументы отсутствуют. Поиск отменен.")
-	} else {
+	default:
 		fmt.Println("Поиск по запросу: ", sText)
-		_, qty := search(sText, &res) // Возвращает слайс из crawler.Document
-		fmt.Println("Найдено (кол-во): ", qty)
+		allDocuments := craw(urls, depth)
+		pages := index.New(allDocuments)
+		tempTest := pages.Search(sText)
+		if len(tempTest) != 0 {
+			fmt.Println("Найденные документы по запросу \"", sText, "\":")
+			for _, value := range tempTest {
+				fmt.Printf("ID: %d \nTitle: %v \nURL: %v \n=========================\n", value.ID, value.Title, value.URL)
+			}
+		} else {
+			fmt.Printf("По запросу \"%v\" - не найдено ни одного документа", sText)
+		}
 	}
 
 }

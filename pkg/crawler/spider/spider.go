@@ -3,10 +3,10 @@
 package spider
 
 import (
+	"gosearch/pkg/crawler"
+	generators "gosearch/pkg/utils"
 	"net/http"
 	"strings"
-
-	"gosearch/pkg/crawler"
 
 	"golang.org/x/net/html"
 )
@@ -20,6 +20,10 @@ func New() *Service {
 	return &s
 }
 
+func genID() int {
+	return generators.RandInt(100_000_000, 999_999_999)
+}
+
 // Scan осуществляет рекурсивный обход ссылок сайта, указанного в URL,
 // с учётом глубины перехода по ссылкам, переданной в depth.
 func (s *Service) Scan(url string, depth int) (data []crawler.Document, err error) {
@@ -31,6 +35,7 @@ func (s *Service) Scan(url string, depth int) (data []crawler.Document, err erro
 		item := crawler.Document{
 			URL:   url,
 			Title: title,
+			ID:    genID(),
 		}
 		data = append(data, item)
 	}
