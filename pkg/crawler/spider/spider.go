@@ -5,6 +5,7 @@ package spider
 import (
 	"gosearch/pkg/crawler"
 	generators "gosearch/pkg/utils"
+	"log"
 	"net/http"
 	"strings"
 
@@ -29,13 +30,16 @@ func genID() int {
 func (s *Service) Scan(url string, depth int) (data []crawler.Document, err error) {
 	pages := make(map[string]string)
 
-	parse(url, url, depth, pages)
-
+	err = parse(url, url, depth, pages)
+	if err != nil {
+		log.Println(err)
+	}
 	for url, title := range pages {
+		id := genID()
 		item := crawler.Document{
 			URL:   url,
 			Title: title,
-			ID:    genID(),
+			ID:    id,
 		}
 		data = append(data, item)
 	}

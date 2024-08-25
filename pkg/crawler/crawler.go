@@ -11,7 +11,7 @@ type Interface interface {
 
 // Document - документ, веб-страница, полученная поисковым роботом.
 type Document struct {
-	ID    int
-	URL   string
-	Title string
+	ID    int    `json:"ID"`
+	URL   string `json:"URL"`
+	Title string `json:"Title"`
 }
