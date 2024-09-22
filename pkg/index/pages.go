@@ -2,10 +2,12 @@ package index
 
 import (
 	"encoding/json"
+	"fmt"
 	"gosearch/pkg/crawler"
 	generators "gosearch/pkg/utils"
 	"log"
 	"sort"
+	"time"
 )
 
 // Кэш документов должен состоять из слайса: структуры документов, сортировать которую будем методом обращения к ID-документа.
@@ -23,10 +25,6 @@ type Pages struct {
 	byteWords []byte
 }
 
-func (p *Pages) GetInfo() (pages *[]crawler.Document, words *map[string][]int) {
-	return &p.pages, &p.words
-}
-
 // Конструктор должен читать из файла индекс, собирать структуру и проверять наличие записей
 func New(urls []string, depth int) (search *Pages) {
 	search = &Pages{
@@ -35,34 +33,37 @@ func New(urls []string, depth int) (search *Pages) {
 	}
 
 	pagesf, wordsf, reindexFlag, err := OpenIndexFile()
+	if err != nil {
+		log.Println("Error open index file: ", err)
+	}
+
 	defer func() {
 		err = pagesf.Close()
 		if err != nil {
 			log.Println("Error close pagefile", err)
 		}
+
 		err = wordsf.Close()
 		if err != nil {
 			log.Println("Error close wordsfile", err)
 		}
 	}()
-	if err != nil {
-		log.Println("Error open index file: ", err)
-	}
-	// 		2.1 Если нет файлов: мы создали новые и начинаем собирать структуру
+
 	if reindexFlag {
-		// 		2.1.1 Сканируем сайты и формируем []crawler.Document
+		fmt.Println("Indexing...")
+		startTime := time.Now()
 		search.pages, err = craw(urls, depth)
 		if err != nil {
 			log.Println("Crawler error: ", err)
 		}
-		// 		2.1.1.1 Сортируем []crawler.Document (с помощью sortPages())
+
 		search.pages = sortPages(search.pages)
-		// 		2.1.2 Формируем words map[string][]int (Indexer)
+
 		err := search.Indexer()
 		if err != nil {
 			log.Println("Indexer error: ", err)
 		}
-		// 		2.1.3 Сериализуем (struct => json => []byte)
+
 		err = search.SerializePages()
 		if err != nil {
 			log.Println("Serialize pages error: ", err)
@@ -76,6 +77,8 @@ func New(urls []string, depth int) (search *Pages) {
 		if err != nil {
 			log.Println(err)
 		}
+		duration := time.Since(startTime)
+		fmt.Println("Индексировано за ", duration)
 	} else {
 		// 			2.2.1 Загружаем файлы
 		// Читаем pagesfile:
@@ -98,6 +101,7 @@ func New(urls []string, depth int) (search *Pages) {
 		if err != nil {
 			log.Println(err)
 		}
+
 	}
 
 	// 		2.2 Если файлы есть, то:
@@ -115,7 +119,6 @@ func New(urls []string, depth int) (search *Pages) {
 }
 
 // Сортирует документы по ID-документов в порядке возрастания
-// TODO:
 // - попробовать принимать указатель на слайс и возвращать его же
 func sortPages(documents []crawler.Document) []crawler.Document {
 	sort.Slice(documents, func(i, j int) bool {
