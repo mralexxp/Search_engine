@@ -174,3 +174,13 @@ func (pages *Pages) DeSerializeWords(wordsStruct *map[string][]int) (n int, err 
 	}
 	return 0, err
 } // вход заменить на io.Reader
+
+// Функция возвращает на words и pages
+func (p *Pages) GetPages() (pages []crawler.Document) {
+	return p.pages
+}
+
+// Функция возвращает на words и pages
+func (p *Pages) GetWords() (words map[string][]int) {
+	return p.words
+}

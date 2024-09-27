@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gosearch/internal/handler"
 	"gosearch/pkg/index"
+	"gosearch/pkg/webapp"
 	"log"
 	"net"
 )
@@ -14,20 +15,11 @@ const (
 	depth          = 2           // Глубина сканирования сайтов
 	reindex        = false
 	ListenAdress   = "127.0.0.1:12345"
+	WebAppAddress  = "127.0.0.1:8080"
 )
 
-// func getFlagS() (string, bool) {
-// 	reindex := true
-// 	target := flag.String("s", "", "Enter string for search in sites")
-// 	index := flag.String("i", "", "Use \"-i on\" for reindex sites")
-// 	flag.Parse()
-// 	if *index == "" {
-// 		reindex = false
-// 	}
-// 	return *target, reindex
-// }
+// Дальнешйее развитие многоканального парсера требует переработки пакета spider
 
-// later: go scan
 func main() {
 	if reindex {
 		fmt.Println("Indexing on. Starting service...")
@@ -38,8 +30,13 @@ func main() {
 	}
 
 	urls := []string{"https://go.dev/"}
-
 	search := index.New(urls, depth)
+
+	wa := webapp.NewWebApp(WebAppAddress, search)
+	err := wa.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println("Server starting...")
 	listener, err := net.Listen("tcp4", ListenAdress)
@@ -54,7 +51,4 @@ func main() {
 		fmt.Println("Connection established. Waiting command...")
 		go handler.Handler(conn, search)
 	}
-
-	// printResult(search.Search(target), target)
-
 }
