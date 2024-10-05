@@ -1,0 +1,1 @@
+This code is not some positive example of writing code. More likely, this skin can be positioned as an anti-pattern that should not be used. The code was written for my own experiments, so use it only for experiments, code reviews and other personal purposes.
